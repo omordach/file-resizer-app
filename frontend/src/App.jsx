@@ -1,11 +1,7 @@
-import FileUploadForm from "./components/FileUploadForm";
+import FileResizerForm from "@/components/FileResizerForm";
 
 function App() {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <FileUploadForm />
-    </div>
-  );
+  return <FileResizerForm />;
 }
 
 export default App;

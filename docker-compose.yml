@@ -1,8 +1,12 @@
-version: '3.8'
+version: "3.8"
+
 services:
-  app:
-    build: ./backend
+  file-resizer-app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend/app:/app/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
