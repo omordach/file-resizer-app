@@ -30,3 +30,5 @@ Thumbs.db
 
 # OS-specific
 *.swp
+
+.env

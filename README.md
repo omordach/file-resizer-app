@@ -1,79 +1,92 @@
 # File Resizer App
 
-A lightweight web tool to resize images or PDFs directly in your browser.
+A web-based tool to resize Images and PDFs using FastAPI, ImageMagick, and Ghostscript. Fully containerized with Docker.
 
----
+## ✅ Build and Run
 
-## ✅ Project Structure
+### 1. **Frontend Setup with Shadcn UI**
 
-```
-file-resizer-app/
-├── backend/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py
-│   │   └── utils.py
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   └── FileUploadForm.jsx
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.js
-├── docker-compose.yml
-├── .gitignore
-├── LICENSE
-└── README.md
-```
-
----
-
-## ✅ Deployment & Usage Instructions (Local & Docker)
-
-### 🛠️ Local Development & Testing
-
-#### 1. Clone the Repository
-
-```bash
-git clone git@github.com:omordach/file-resizer-app.git
-cd file-resizer-app
-```
-
-
-### 🐳 Docker Deployment (All-in-One)
-
-#### 1. Build the Frontend
+#### Initialize Shadcn UI
 
 ```bash
 cd frontend
+npx shadcn@latest init
+```
+
+> **Note:**  
+> If prompted, add a `jsconfig.json` with the following content to support `@/` alias:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}
+```
+
+#### Add UI Components
+
+```bash
+npx shadcn@latest add button input select label card
+```
+
+#### Install Dependencies and Build Frontend
+
+```bash
 npm install
 npm run build
 ```
 
-#### 2. Build Docker Image
+---
 
-From the root directory of the project, run:
+### 2. **Backend Setup**
+
+#### Install Python Dependencies
+
+```bash
+cd ../backend
+pip install -r requirements.txt
+```
+
+#### (Optional) Run Locally
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+---
+
+### 3. **Docker Build & Run**
+
+#### Build Docker Image
+
 ```bash
 docker build -t file-resizer-app -f backend/Dockerfile .
 ```
 
-#### 3. Run Docker Container Locally
+#### Run Docker Container
 
 ```bash
 docker run -p 8000:8000 file-resizer-app
 ```
 
-> Access the app at [http://localhost:8000](http://localhost:8000).
+Access the app at [http://localhost:8000](http://localhost:8000).
 
+---
 
+### 4. **Docker Compose Alternative**
 
-## ✅ Notes
+If you prefer **docker-compose**, use:
 
-* **Max upload file size**: 30 MB
-* **Logs**: Available in Docker or Python console output
-* **Data Handling**: Stateless, no user data retention
+```bash
+docker-compose up --build
+```
+
+And stop with:
+
+```bash
+docker-compose down
+```
