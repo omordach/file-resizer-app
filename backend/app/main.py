@@ -28,5 +28,7 @@ async def process(
     return FileResponse(output_path, filename=os.path.basename(output_path))
 
 # Mount static files after API routes
-#app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="frontend")
+# Locally
+# app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="frontend")
+# Docker
 app.mount("/", StaticFiles(directory="./static", html=True), name="frontend")
