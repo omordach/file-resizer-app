@@ -70,39 +70,7 @@ docker run -p 8000:8000 file-resizer-app
 
 > Access the app at [http://localhost:8000](http://localhost:8000).
 
-#### 4. Tag Docker Image (Optional, for Pushing)
 
-```bash
-docker tag file-resizer-app your-dockerhub-username/file-resizer-app:latest
-```
-
-#### 5. Push Docker Image to Docker Hub (Optional)
-
-```bash
-docker push your-dockerhub-username/file-resizer-app:latest
-```
-
----
-
-## ✅ Health Check
-
-The application exposes a simple health check endpoint:
-
-* **GET /health**
-
-Example usage:
-
-```bash
-curl http://localhost:8000/health
-```
-
-Expected response:
-
-```json
-{"status": "ok"}
-```
-
----
 
 ## ✅ Notes
 
