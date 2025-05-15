@@ -3,8 +3,10 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
 from .utils import process_file
+from .rate_limit import rate_limit_middleware
 
 app = FastAPI()
+app.middleware("http")(rate_limit_middleware)
 
 @app.post("/api/process")
 async def process(
