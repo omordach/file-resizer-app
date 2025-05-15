@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
@@ -11,11 +12,17 @@ export default function FileResizerForm() {
   const [width, setWidth] = useState("");
   const [height, setHeight] = useState("");
   const [quality, setQuality] = useState("ebook");
+  const [captchaToken, setCaptchaToken] = useState("");
   const [message, setMessage] = useState("");
+
+  const handleCaptchaChange = (value) => {
+    setCaptchaToken(value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) return setMessage("Please select a file.");
+    if (!captchaToken) return setMessage("Please complete the captcha.");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -23,22 +30,28 @@ export default function FileResizerForm() {
     formData.append("width", width);
     formData.append("height", height);
     formData.append("quality", quality);
+    formData.append("captcha_token", captchaToken);
 
-    const response = await fetch("/api/process", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("/api/process", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = file.name;
-      link.click();
-      setMessage("✅ File processed successfully.");
-    } else {
-      setMessage("❌ Error processing file.");
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = file.name;
+        link.click();
+        setMessage("✅ File processed successfully.");
+      } else {
+        setMessage("❌ Error processing file.");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("❌ An unexpected error occurred.");
     }
   };
 
@@ -95,6 +108,10 @@ export default function FileResizerForm() {
               </Select>
             </div>
           )}
+
+          <div>
+            <ReCAPTCHA sitekey="6Ld_rTsrAAAAAL3WCWzTJnrRYDdPKxbKvkJR1B1r" onChange={handleCaptchaChange} />
+          </div>
 
           <Button className="w-full mt-2" onClick={handleSubmit}>
             Process

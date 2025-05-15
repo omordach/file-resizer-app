@@ -1,12 +1,30 @@
+import os
+import requests
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-import os
 from .utils import process_file
 from .rate_limit import rate_limit_middleware
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI()
 app.middleware("http")(rate_limit_middleware)
+
+def verify_recaptcha(token: str):
+    secret_key = os.getenv("RECAPTCHA_SECRET_KEY")
+    if not secret_key:
+        raise HTTPException(status_code=500, detail="reCAPTCHA secret key not configured")
+    
+    response = requests.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data={"secret": secret_key, "response": token}
+    )
+    result = response.json()
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail="Invalid reCAPTCHA verification")
 
 @app.post("/api/process")
 async def process(
@@ -14,8 +32,12 @@ async def process(
     file_type: str = Form(...),
     width: str = Form(None),
     height: str = Form(None),
-    quality: str = Form(None)
+    quality: str = Form(None),
+    captcha_token: str = Form(...)
 ):
+    # Validate reCAPTCHA token first
+    verify_recaptcha(captcha_token)
+
     # Safely convert width and height to integers if valid
     width = int(width) if width and width.isdigit() else None
     height = int(height) if height and height.isdigit() else None
