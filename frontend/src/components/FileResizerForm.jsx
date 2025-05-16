@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDropzone } from "react-dropzone";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,14 @@ export default function FileResizerForm() {
   const [quality, setQuality] = useState("ebook");
   const [captchaToken, setCaptchaToken] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onDrop = (acceptedFiles) => {
+    setFile(acceptedFiles[0]);
+    setMessage("");
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleCaptchaChange = (value) => {
     setCaptchaToken(value);
@@ -21,8 +30,8 @@ export default function FileResizerForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return setMessage("Please select a file.");
-    if (!captchaToken) return setMessage("Please complete the captcha.");
+    if (!file) return setMessage("⚠️ Please select a file.");
+    if (!captchaToken) return setMessage("⚠️ Please complete the captcha.");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -32,11 +41,9 @@ export default function FileResizerForm() {
     formData.append("quality", quality);
     formData.append("captcha_token", captchaToken);
 
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/process", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch("/api/process", { method: "POST", body: formData });
 
       if (response.ok) {
         const blob = await response.blob();
@@ -52,6 +59,8 @@ export default function FileResizerForm() {
     } catch (error) {
       console.error(error);
       setMessage("❌ An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,9 +70,18 @@ export default function FileResizerForm() {
         <CardContent className="p-6 space-y-4">
           <h2 className="text-xl font-semibold text-center">Resize File</h2>
 
-          <div>
-            <Label htmlFor="file">File Upload</Label>
-            <Input id="file" type="file" onChange={(e) => setFile(e.target.files[0])} />
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed p-4 text-center rounded cursor-pointer ${
+              isDragActive ? "bg-gray-100" : "bg-white"
+            }`}
+          >
+            <input {...getInputProps()} />
+            {file ? (
+              <p>Selected file: {file.name}</p>
+            ) : (
+              <p>Drag 'n' drop a file here, or click to select</p>
+            )}
           </div>
 
           <div>
@@ -113,8 +131,8 @@ export default function FileResizerForm() {
             <ReCAPTCHA sitekey="6Ld_rTsrAAAAAL3WCWzTJnrRYDdPKxbKvkJR1B1r" onChange={handleCaptchaChange} />
           </div>
 
-          <Button className="w-full mt-2" onClick={handleSubmit}>
-            Process
+          <Button className="w-full mt-2" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? "Processing..." : "Process"}
           </Button>
 
           {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
