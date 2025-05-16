@@ -5,9 +5,9 @@ test('User can upload file, fill form, and process file', async ({ page }) => {
   await page.goto('/');
 
   // Locate dropzone and upload file
-  const filePath = path.resolve('tests/test-image.png'); // Ensure this file exists
-  const dropzone = page.locator('text=Drag \'n\' drop a file here');
-  await dropzone.setInputFiles(filePath);
+const filePath = path.resolve('tests/test-image.png'); // Ensure this file exists
+const fileInput = page.locator('input[type="file"]');
+await fileInput.setInputFiles(filePath);
 
   // Select Image type
   await page.getByText('File Type').click();
