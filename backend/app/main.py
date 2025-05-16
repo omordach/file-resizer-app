@@ -14,6 +14,10 @@ app = FastAPI()
 app.middleware("http")(rate_limit_middleware)
 
 def verify_recaptcha(token: str):
+    if os.getenv("DISABLE_CAPTCHA") == "true":
+        print("⚠️ CAPTCHA verification is disabled for testing")
+        return
+
     secret_key = os.getenv("RECAPTCHA_SECRET_KEY")
     if not secret_key:
         raise HTTPException(status_code=500, detail="reCAPTCHA secret key not configured")

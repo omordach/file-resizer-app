@@ -6,6 +6,7 @@ services:
     environment:
       - PYTHONPATH=/app
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+      - DISABLE_CAPTCHA=true
     ports:
       - "8080:8080"
 
