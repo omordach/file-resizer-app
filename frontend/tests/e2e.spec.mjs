@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import path from 'path';
 
 test('Page loads and all key elements are visible', async ({ page }) => {
-  await page.goto('http://localhost:8000');
+  await page.goto('/');
 
   // Check for page title
   await expect(page.locator('text=Resize File')).toBeVisible();
