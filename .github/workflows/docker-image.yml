@@ -7,15 +7,42 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  build:
-
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
+
+    - name: Build Backend Docker Image
       run: docker build -t file-resizer-app -f backend/Dockerfile .
-      
-    - name: Run Tests Inside Container
+
+    - name: Run Backend Tests Inside Container
       run: docker run --rm -e PYTHONPATH=/app -e RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }} file-resizer-app pytest tests
+
+    - name: Run Backend in Detached Mode for E2E Testing
+      run: docker run -d -p 8080:8080 --name file-resizer-app-e2e -e PYTHONPATH=/app -e RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }} file-resizer-app
+
+    - name: Wait for Backend to Be Ready
+      run: |
+        for i in {1..10}; do
+          curl -sSf http://localhost:8080 && break || sleep 5
+        done
+
+    - name: Install Node.js for Playwright
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install Frontend Dependencies
+      run: |
+        cd frontend
+        npm ci
+        npx playwright install --with-deps
+
+    - name: Run Playwright Tests
+      run: |
+        cd frontend
+        npx playwright test
+
+    - name: Shutdown Docker Container
+      run: docker stop file-resizer-app-e2e
