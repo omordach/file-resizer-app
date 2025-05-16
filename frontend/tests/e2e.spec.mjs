@@ -11,7 +11,7 @@ await fileInput.setInputFiles(filePath);
 
   // Select Image type
   await page.getByText('File Type').click();
-  await page.getByRole('option', { name: 'Image' }).click();
+  await page.getByText('Image').click();
 
   // Fill width and height
   await page.locator('input#width').fill('300');
