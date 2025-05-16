@@ -2,28 +2,31 @@ import { test, expect } from '@playwright/test';
 import path from 'path';
 
 test('User can upload file, fill form, and process file', async ({ page }) => {
-  await page.goto('/');
+  // Open the application
+  await page.goto('http://localhost:8000');
 
-  // Locate dropzone and upload file
-const filePath = path.resolve('tests/test-image.png'); // Ensure this file exists
-const fileInput = page.locator('input[type="file"]');
-await fileInput.setInputFiles(filePath);
+  // Upload file using hidden file input
+  const filePath = path.resolve('tests/test-image.png'); // Make sure this file exists
+  const fileInput = page.locator('input[type="file"]');
+  await fileInput.setInputFiles(filePath);
 
-  // Select Image type
+  // Open the File Type dropdown
   await page.getByText('File Type').click();
+
+  // Select 'Image' option safely without conflict
   await page.locator('div[role="option"]', { hasText: 'Image' }).click();
 
   // Fill width and height
   await page.locator('input#width').fill('300');
   await page.locator('input#height').fill('300');
 
-  // Complete dummy reCAPTCHA if skipped in test mode, otherwise simulate
-  // Skipped for now as reCAPTCHA blocks automation.
+  // Bypass reCAPTCHA or assume it's disabled in test mode
+  // No action needed if DISABLE_CAPTCHA=true on backend
 
-  // Click Process button
-  const button = page.getByRole('button', { name: /Process/ });
-  await button.click();
+  // Submit the form
+  const submitButton = page.getByRole('button', { name: /Process/ });
+  await submitButton.click();
 
-  // Expect message about success or error
+  // Expect success message
   await expect(page.locator('text=File processed successfully')).toBeVisible({ timeout: 10000 });
 });
