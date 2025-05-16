@@ -1,12 +1,17 @@
-version: "3.8"
-
 services:
-  file-resizer-app:
+  backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    ports:
-      - "8000:8000"
     environment:
-      - PYTHONUNBUFFERED=1
-    restart: unless-stopped
+      - PYTHONPATH=/app
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+    ports:
+      - "8080:8080"
+
+  # Optional: Playwright in Docker (if you want to run it containerized)
+  # playwright:
+  #   image: mcr.microsoft.com/playwright:v1.44.1-focal
+  #   depends_on:
+  #     - backend
+  #   entrypoint: ["npx", "playwright", "test"]
