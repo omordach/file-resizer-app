@@ -1,8 +1,10 @@
 import os
 import requests
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.requests import Request
+from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 from .utils import process_file
 from .rate_limit import rate_limit_middleware
 from dotenv import load_dotenv
@@ -12,6 +14,15 @@ load_dotenv()
 
 app = FastAPI()
 app.middleware("http")(rate_limit_middleware)
+
+# Global exception handler for unhandled server errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    print(f"Unhandled error: {exc}")
+    return JSONResponse(
+        status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Something went wrong. Please try again later."}
+    )
 
 def verify_recaptcha(token: str):
     if os.getenv("DISABLE_CAPTCHA") == "true":

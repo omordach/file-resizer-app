@@ -10,7 +10,6 @@ class RateLimiter:
     def cleanup(self):
         now = time.time()
         window_start = now - self.window_seconds
-        # Keep only active IPs with recent requests
         self.clients = {
             ip: [ts for ts in timestamps if ts > window_start]
             for ip, timestamps in self.clients.items()
@@ -20,17 +19,13 @@ class RateLimiter:
     def check(self, client_ip: str):
         now = time.time()
         window_start = now - self.window_seconds
-
-        # Cleanup old records before checking
         self.cleanup()
 
         if client_ip not in self.clients:
             self.clients[client_ip] = []
 
-        # Filter timestamps that are still in the window
         request_times = [ts for ts in self.clients[client_ip] if ts > window_start]
         request_times.append(now)
-
         self.clients[client_ip] = request_times
 
         if len(request_times) > self.limit:
@@ -40,11 +35,18 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 async def rate_limit_middleware(request: Request, call_next):
-    # Skip static assets from rate limiting
-    if request.url.path.startswith("/assets") or request.url.path in ["/favicon.ico", "/manifest.json", "/robots.txt"]:
+    client_ip = request.client.host
+    path = request.url.path
+    method = request.method
+
+    # Skip static assets or root page
+    if method == "GET" and (
+        "." in path or 
+        path in ["/favicon.ico", "/manifest.json", "/robots.txt", "/"]
+    ):
         return await call_next(request)
 
-    client_ip = request.client.host
+    print(f"Rate limiting check for {client_ip} on {method} {path}")
     try:
         rate_limiter.check(client_ip)
     except HTTPException as e:
