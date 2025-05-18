@@ -18,8 +18,16 @@ export default function FileResizerForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const onDrop = (acceptedFiles) => {
-    setFile(acceptedFiles[0]);
+    const uploadedFile = acceptedFiles[0];
+    setFile(uploadedFile);
     setMessage("");
+
+    // Auto-detect file type
+    if (uploadedFile.type.startsWith("image/")) {
+      setFileType("Image");
+    } else if (uploadedFile.type === "application/pdf") {
+      setFileType("PDF");
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -64,25 +72,26 @@ export default function FileResizerForm() {
     }
   };
 
+  const handleClear = () => {
+    setFile(null);
+    setMessage("");
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-md">
         <CardContent className="p-6 space-y-4">
           <h2 className="text-xl font-semibold text-center">Resize File</h2>
 
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed p-4 text-center rounded cursor-pointer ${
-              isDragActive ? "bg-gray-100" : "bg-white"
-            }`}
-          >
+          <div {...getRootProps()} className={`border-2 border-dashed p-4 text-center rounded cursor-pointer ${isDragActive ? "bg-gray-100" : "bg-white"}`}>
             <input {...getInputProps()} />
-            {file ? (
-              <p>Selected file: {file.name}</p>
-            ) : (
-              <p>Drag 'n' drop a file here, or click to select</p>
-            )}
+            {file ? <p>Selected file: {file.name}</p> : <p>Drag 'n' drop a file here, or click to select</p>}
+            <p className="text-xs text-muted-foreground mt-1">Supported: JPG, PNG, PDF (max 30MB)</p>
           </div>
+
+          {file && file.type.startsWith("image/") && (
+            <img src={URL.createObjectURL(file)} alt="Preview" className="mt-2 rounded shadow" />
+          )}
 
           <div>
             <Label>File Type</Label>
@@ -131,9 +140,12 @@ export default function FileResizerForm() {
             <ReCAPTCHA sitekey="6Ld_rTsrAAAAAL3WCWzTJnrRYDdPKxbKvkJR1B1r" onChange={handleCaptchaChange} />
           </div>
 
-          <Button className="w-full mt-2" onClick={handleSubmit} disabled={isLoading}>
-            {isLoading ? "Processing..." : "Process"}
-          </Button>
+          <div className="flex space-x-2 mt-2">
+            <Button className="w-full" onClick={handleSubmit} disabled={isLoading}>
+              {isLoading ? "Processing..." : "Process"}
+            </Button>
+            {file && <Button variant="secondary" onClick={handleClear}>Clear File</Button>}
+          </div>
 
           {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
         </CardContent>
