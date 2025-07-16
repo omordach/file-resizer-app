@@ -82,4 +82,8 @@ async def process(
 # Locally
 # app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="frontend")
 # Docker
-app.mount("/", StaticFiles(directory="./static", html=True), name="frontend")
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+else:
+    print(f"Static directory not found: {static_dir}. Skipping mount.")

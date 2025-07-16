@@ -4,5 +4,5 @@ requests
 python-multipart
 pillow
 pytest
-httpx
+httpx==0.24.1
 python-dotenv

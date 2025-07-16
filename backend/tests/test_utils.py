@@ -1,5 +1,9 @@
 import os
+import sys
+import shutil
 import pytest
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from app.utils import process_file
 
 TEST_DIR = os.path.dirname(__file__)
@@ -21,6 +25,12 @@ def test_process_file_creates_output(file_type, test_file_path, width, height, q
     dummy_file = DummyFile(test_file_path)
 
     # Process the file using your application logic
+    # Skip if required external tools are not available
+    if file_type == "PDF" and shutil.which("gs") is None:
+        pytest.skip("Ghostscript not installed")
+    if file_type == "Image" and shutil.which("convert") is None:
+        pytest.skip("ImageMagick not installed")
+
     output_path = process_file(dummy_file, file_type, width, height, quality)
 
     # Assert output file was created successfully
