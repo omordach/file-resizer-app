@@ -15,6 +15,11 @@ load_dotenv()
 app = FastAPI()
 app.middleware("http")(rate_limit_middleware)
 
+# Basic health check endpoint
+@app.get("/")
+async def read_root():
+    return {"message": "File Resizer API"}
+
 # Global exception handler for unhandled server errors
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -57,7 +62,14 @@ async def process(
     width = int(width) if width and width.isdigit() else None
     height = int(height) if height and height.isdigit() else None
 
-    if file.size > 30 * 1024 * 1024:
+    # UploadFile does not expose the file size directly. Seek to the end to
+    # determine the size and then reset the pointer to the beginning so the
+    # file can be read later.
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    if file_size > 30 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File exceeds 30MB limit.")
 
     output_path = process_file(file, file_type, width, height, quality)

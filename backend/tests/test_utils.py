@@ -2,14 +2,16 @@ import os
 import pytest
 from app.utils import process_file
 
+TEST_DIR = os.path.dirname(__file__)
+
 class DummyFile:
     def __init__(self, filepath):
         self.filename = os.path.basename(filepath)
         self.file = open(filepath, "rb")
 
 @pytest.mark.parametrize("file_type,test_file_path,width,height,quality", [
-    ("Image", "tests/assets/test-image.jpg", 100, 100, None),
-    ("PDF", "tests/assets/test-file.pdf", None, None, "ebook"),
+    ("Image", os.path.join(TEST_DIR, "assets/test-image.jpg"), 100, 100, None),
+    ("PDF", os.path.join(TEST_DIR, "assets/test-file.pdf"), None, None, "ebook"),
 ])
 def test_process_file_creates_output(file_type, test_file_path, width, height, quality):
     # Validate that the test file exists
