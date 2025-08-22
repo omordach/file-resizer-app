@@ -70,4 +70,10 @@ async def process(
 # Locally
 # app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="frontend")
 # Docker
-app.mount("/", StaticFiles(directory="./static", html=True), name="frontend")
+static_dir = "./static"
+if os.path.isdir(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+else:
+    @app.get("/")
+    async def health_check():
+        return {"status": "ok"}
