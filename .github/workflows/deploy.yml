@@ -1,0 +1,61 @@
+name: Deploy to Cloud Run
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      REGION: ${{ secrets.GCP_REGION }}
+      SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
+      IMAGE: ${{ secrets.ARTIFACT_REGISTRY }}/file-resizer-app:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: '>= 463.0.0'
+
+      - name: Configure Docker auth for Artifact Registry
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build and Push Image
+        run: |
+          docker build -t $IMAGE -f backend/Dockerfile .
+          docker push $IMAGE
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.IMAGE }}
+          flags: >-
+            --allow-unauthenticated
+            --concurrency=40
+            --memory=512Mi
+            --cpu=1
+            --max-instances=3
+            --port=8080
+            --timeout=300
+            --set-env-vars=PYTHONUNBUFFERED=1,MAX_UPLOAD_MB=30
+
+      - name: Output service URL
+        run: |
+          gcloud run services describe $SERVICE --platform=managed --region=$REGION --format='value(status.url)'
