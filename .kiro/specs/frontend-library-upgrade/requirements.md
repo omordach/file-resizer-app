@@ -13,6 +13,7 @@ This document outlines the requirements for upgrading the frontend libraries in 
 - **Patch Version**: A version increment that includes backward-compatible bug fixes (e.g., 4.1.1 to 4.1.2)
 - **Stable Version**: A released version that is not marked as alpha, beta, or release candidate
 - **Breaking Change**: A modification that requires code changes to maintain existing functionality
+- **Security Vulnerability**: A flaw in software that can be exploited to compromise system security or data integrity
 
 ## Requirements
 
@@ -26,6 +27,7 @@ This document outlines the requirements for upgrading the frontend libraries in 
 2. WHEN the upgrade is performed THEN the Frontend Application SHALL update React DOM to match the React version
 3. WHEN the React upgrade is complete THEN the Frontend Application SHALL build successfully without errors
 4. WHEN the React upgrade is complete THEN all existing functionality SHALL continue to work as before
+5. WHEN selecting React version THEN the Frontend Application SHALL NOT upgrade to React 19.x due to known security vulnerabilities (CVE affecting versions 19.0, 19.1.0, 19.1.1, 19.2.0)
 
 ### Requirement 2
 

@@ -7,21 +7,23 @@
   - _Requirements: 8.1_
 
 - [x] 2. Upgrade React and React DOM
-  - Update React to latest stable 18.x version in package.json
+  - Update React to latest stable 18.x version in package.json (DO NOT use 19.x - security vulnerability)
   - Update React DOM to match React version
   - Run `npm install` to update package-lock.json
-  - _Requirements: 1.1, 1.2, 8.1_
+  - **Security Note**: React 19.0, 19.1.0, 19.1.1, 19.2.0 have known vulnerabilities - stay on 18.x
+  - _Requirements: 1.1, 1.2, 1.5, 8.1_
 
 - [x] 2.1 Validate React upgrade
   - Run `npm run build` to verify build succeeds
   - Check that React and React DOM versions match
-  - _Requirements: 1.3, 1.2_
+  - Verify React version is 18.x (not 19.x)
+  - _Requirements: 1.3, 1.2, 1.5_
 
 - [ ]* 2.2 Run E2E tests after React upgrade
   - Execute `npx playwright test` to verify functionality
   - _Requirements: 7.3_
 
-- [ ] 3. Upgrade Vite and build tools
+- [x] 3. Upgrade Vite and build tools
   - Update Vite to latest stable version (5.x or 6.x)
   - Update @vitejs/plugin-react to compatible version
   - Review Vite changelog for breaking changes

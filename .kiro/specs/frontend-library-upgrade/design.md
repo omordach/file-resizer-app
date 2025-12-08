@@ -179,10 +179,12 @@ After automated tests pass, perform manual verification:
 
 ### Phase 1: Core Framework (React)
 
-1. Update React and React DOM to latest 18.x
+1. Update React and React DOM to latest 18.x (DO NOT upgrade to 19.x - security vulnerability)
 2. Run build
 3. Run E2E tests
 4. Commit if successful
+
+> **Security Note (December 2025)**: React 19.0, 19.1.0, 19.1.1, and 19.2.0 have known security vulnerabilities. Stay on React 18.x until React 19.2.1+ is available and verified.
 
 ### Phase 2: Build Tools (Vite)
 
@@ -247,7 +249,7 @@ After automated tests pass, perform manual verification:
 
 ### Version Constraints
 
-- React must remain on 18.x (not upgrade to 19.x) to maintain stability
+- **SECURITY: React must remain on 18.x** - React 19.x versions (19.0, 19.1.0, 19.1.1, 19.2.0) have known security vulnerabilities. Do NOT upgrade to React 19.x until a patched version (19.2.1+) is verified safe and stable.
 - Node.js version must be compatible with all upgraded packages (currently using Node 20)
 - Some packages may have peer dependency requirements that limit upgrade options
 
