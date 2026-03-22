@@ -1,7 +1,0 @@
-🛡️ Sentinel: [HIGH] Fix argument injection vulnerability in quality parameter
-
-🚨 Severity: HIGH
-💡 Vulnerability: The `quality` parameter was not validated before being passed to `subprocess.run` (Ghostscript and ImageMagick). An attacker could inject arbitrary arguments by providing crafted input like `"ebook\" -sOutputFile=/etc/passwd \""` which would then alter the behavior of the executed command.
-🎯 Impact: Arbitrary argument injection could lead to arbitrary file reads, writes, or execution depending on the tool's capabilities.
-🔧 Fix: Implemented strict allowlist validation for the `quality` parameter in `backend/app/main.py`. For PDFs, it must be one of the allowed Ghostscript settings (e.g., `screen`, `ebook`). For Images, it must be purely digits.
-✅ Verification: Ran `pytest` backend tests and Playwright frontend tests to ensure no regressions. Verified manually by sending crafted payloads which are now rejected with a 400 Bad Request.
