@@ -60,6 +60,17 @@ async def process(
     if file.size > 30 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File exceeds 30MB limit.")
 
+    # 🛡️ Sentinel: Validate file extension to prevent processing of malicious files (e.g., SVG/MVG for ImageMagick)
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    allowed_extensions = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".pdf"}
+    if ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Invalid file extension. Only PNG, JPG, JPEG, GIF, WEBP, and PDF are allowed.")
+
+    # 🛡️ Sentinel: Validate content type to ensure it matches allowed types
+    allowed_content_types = {"image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"}
+    if file.content_type not in allowed_content_types:
+        raise HTTPException(status_code=400, detail="Invalid file content type.")
+
     output_path = process_file(file, file_type, width, height, quality)
     if not output_path:
         raise HTTPException(status_code=500, detail="Failed to process file. Check server logs.")
