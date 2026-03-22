@@ -67,7 +67,11 @@ async def readyz():
     return {"status": "ready"}
 
 @app.post("/api/process")
-async def process(
+# ⚡ Bolt: Changed from `async def` to `def` to offload synchronous
+# external commands (like `subprocess.run` inside `process_file`) to
+# FastAPI's internal threadpool. This prevents blocking the main
+# asyncio event loop, allowing the server to handle other requests concurrently.
+def process(
     request: Request,
     file: UploadFile = File(...),
     file_type: str = Form(...),
