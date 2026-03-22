@@ -105,7 +105,7 @@ async def process(
     if file_type not in allowed_types or (ctype and ctype not in allowed_types[file_type]):
         raise HTTPException(status_code=400, detail="Unsupported file type")
 
-    output_path = process_file(file, file_type, width, height, quality, max_bytes=max_bytes)
+    output_path = process_file(file, file_type, width, height, quality, max_bytes=max_bytes, content_type=ctype)
     if not output_path:
         raise HTTPException(status_code=500, detail="Failed to process file. Check server logs.")
 
