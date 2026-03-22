@@ -52,10 +52,7 @@ def verify_recaptcha(token: str):
 
 
 def get_client_ip(request: Request) -> str:
-    # Prefer X-Forwarded-For (Cloud Run) then fall back
-    xff = request.headers.get("x-forwarded-for")
-    if xff:
-        return xff.split(",")[0].strip()
+    # Rely on ASGI server (e.g. uvicorn --proxy-headers) to resolve real IP securely
     return request.client.host if request.client else "unknown"
 
 
@@ -108,7 +105,7 @@ async def process(
         "PDF": {"application/pdf"},
     }
     ctype = getattr(file, "content_type", None)
-    if file_type not in allowed_types or (ctype and ctype not in allowed_types[file_type]):
+    if file_type not in allowed_types or not ctype or ctype not in allowed_types[file_type]:
         raise HTTPException(status_code=400, detail="Unsupported file type")
 
     output_path = process_file(file, file_type, width, height, quality, max_bytes=max_bytes, content_type=ctype)
