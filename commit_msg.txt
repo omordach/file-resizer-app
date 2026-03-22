@@ -1,0 +1,7 @@
+🛡️ Sentinel: [CRITICAL] Fix ImageMagick Extension Spoofing
+
+🚨 Severity: CRITICAL
+💡 Vulnerability: The application trusted the user-provided file extension when creating temporary files for processing by ImageMagick. This allowed an attacker to bypass content-type validation and force ImageMagick to use a different decoder (like MSL or MVG) by spoofing the file extension, potentially leading to arbitrary code execution or SSRF.
+🎯 Impact: Remote Code Execution (RCE) or Server-Side Request Forgery (SSRF) via ImageMagick delegate injection.
+🔧 Fix: Mapped the validated `Content-Type` to a strictly controlled, known-safe file extension (`.jpg`, `.png`, `.webp`, `.pdf`) and used that for the temporary file instead of the user-provided filename's extension. Fallback to `.bin` for unknown types.
+✅ Verification: Ran `pytest` backend tests to ensure legitimate files are still processed correctly. Verified malicious payloads (e.g., SVG/MVG with `.jpg` extension) now fail safely because they are forced to be processed as JPEG or `.bin` files.

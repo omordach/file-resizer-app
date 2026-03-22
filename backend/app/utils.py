@@ -22,10 +22,20 @@ def _copy_with_limit(src, dst, max_bytes: Optional[int] = None) -> int:
     return total
 
 
-def process_file(file, file_type, width, height, quality, max_bytes: Optional[int] = None):
+def process_file(file, file_type, width, height, quality, max_bytes: Optional[int] = None, content_type: Optional[str] = None):
     print(f"Processing file: {getattr(file, 'filename', 'unknown')}, type: {file_type}, width: {width}, height: {height}, quality: {quality}")
 
-    with NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_input:
+    # Map validated content_type to a safe file extension to prevent spoofing
+    ext_map = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+        "application/pdf": ".pdf"
+    }
+    # Fallback to .bin to avoid ImageMagick delegate execution from spoofed extensions like .mvg
+    safe_suffix = ext_map.get(content_type, ".bin")
+
+    with NamedTemporaryFile(delete=False, suffix=safe_suffix) as temp_input:
         try:
             _copy_with_limit(file.file, temp_input, max_bytes=max_bytes)
         except ValueError:
