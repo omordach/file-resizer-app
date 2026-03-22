@@ -1,6 +1,7 @@
+import contextlib
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404
 from tempfile import NamedTemporaryFile
 from typing import Optional
 
@@ -15,10 +16,8 @@ def _copy_with_limit(src, dst, max_bytes: Optional[int] = None) -> int:
         if max_bytes is not None and total > max_bytes:
             raise ValueError("Uploaded file exceeds size limit")
         dst.write(chunk)
-    try:
+    with contextlib.suppress(Exception):
         src.seek(0)
-    except Exception:
-        pass
     return total
 
 
@@ -78,26 +77,20 @@ def process_file(file, file_type, width, height, quality, max_bytes: Optional[in
 
     print(f"Running command: {' '.join(cmd)}")
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True)  # nosec B603
     except subprocess.CalledProcessError as e:
         print(f"Error during subprocess execution: {e}")
-        try:
+        with contextlib.suppress(Exception):
             os.remove(temp_input_path)
-        except Exception:
-            pass
         return None
 
     if not os.path.exists(output_path):
         print(f"Expected output file does not exist: {output_path}")
-        try:
+        with contextlib.suppress(Exception):
             os.remove(temp_input_path)
-        except Exception:
-            pass
         return None
 
     print(f"Output file generated at: {output_path}")
-    try:
+    with contextlib.suppress(Exception):
         os.remove(temp_input_path)
-    except Exception:
-        pass
     return output_path
