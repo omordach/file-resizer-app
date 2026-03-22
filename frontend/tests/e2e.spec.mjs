@@ -19,6 +19,7 @@ test('Page loads and all key elements are visible', async ({ page }) => {
   // Check for reCAPTCHA iframe specifically (avoid strict mode on multiple iframes)
   await expect(page.locator('iframe[title="reCAPTCHA"]')).toBeVisible();
 
+
   // Check for Process button
   await expect(page.getByRole('button', { name: /Process/ })).toBeVisible();
 });
