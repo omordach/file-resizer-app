@@ -1,4 +1,4 @@
-## 2024-05-24 - File Extension Spoofing leading to ImageMagick Delegate Injection
-**Vulnerability:** The application trusts the file extension provided by the user (`os.path.splitext(file.filename)[1]`) when creating the temporary file. ImageMagick uses the file extension (e.g., `.svg`, `.mvg`, `.msl`) to determine which delegate/decoder to use. This allows an attacker to upload an arbitrary file (like a malicious SVG or MSL) as a JPEG, bypass content-type checks, and execute arbitrary commands or perform SSRF via ImageMagick delegates.
-**Learning:** Never trust user-provided filenames or extensions. When passing files to tools like ImageMagick that rely on file extensions to select parsers, strictly control the extension of the temporary file based on the validated Content-Type, or use a tool to sniff the actual file magic bytes.
-**Prevention:** Instead of using the extension from the user-provided filename, map the validated `content_type` to a safe, known extension, and enforce that extension on the temporary file.
+## 2024-05-24 - Rate Limit Bypass due to IP Spoofing
+**Vulnerability:** The rate limiter blindly trusted the `X-Forwarded-For` header for IP identification, allowing attackers to spoof their IP by sending custom `X-Forwarded-For` values and bypassing rate limits.
+**Learning:** Never implicitly trust HTTP headers that can be spoofed by clients, especially for security controls like rate limiting. In cloud environments where `X-Forwarded-For` is valid, only trust it from the trusted reverse proxy / load balancer, or sanitize it.
+**Prevention:** Use the direct client IP `request.client.host` when not behind a trusted proxy, or configure the app to securely parse proxy headers.
