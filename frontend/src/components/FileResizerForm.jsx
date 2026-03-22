@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import ReCAPTCHA from "react-google-recaptcha";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,20 @@ export default function FileResizerForm() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+
+  useEffect(() => {
+    if (!file || !file.type.startsWith("image/")) {
+      setPreviewUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+
+    // free memory when ever this component is unmounted
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
 
   const onDrop = (acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
@@ -60,6 +74,10 @@ export default function FileResizerForm() {
         link.href = url;
         link.download = file.name;
         link.click();
+
+        // Clean up the object URL to avoid memory leaks
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+
         setMessage("✅ File processed successfully.");
       } else {
         setMessage("❌ Error processing file.");
@@ -90,7 +108,7 @@ export default function FileResizerForm() {
           </div>
 
           {file && file.type.startsWith("image/") && (
-            <img src={URL.createObjectURL(file)} alt="Preview" className="mt-2 rounded shadow" />
+            <img src={previewUrl} alt="Preview" className="mt-2 rounded shadow" />
           )}
 
           <div>
