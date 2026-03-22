@@ -86,6 +86,12 @@ async def process(
     width = int(width) if width and width.isdigit() else None
     height = int(height) if height and height.isdigit() else None
 
+    if quality:
+        if file_type == "PDF" and quality not in {"screen", "ebook", "printer", "prepress", "default"}:
+            raise HTTPException(status_code=400, detail="Invalid quality setting for PDF")
+        if file_type == "Image" and not quality.isdigit():
+            raise HTTPException(status_code=400, detail="Invalid quality setting for Image")
+
     # Enforce size limit
     max_mb = int(os.getenv("MAX_UPLOAD_MB", "30"))
     max_bytes = max_mb * 1024 * 1024
