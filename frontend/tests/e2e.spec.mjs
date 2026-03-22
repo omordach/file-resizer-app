@@ -16,8 +16,9 @@ test('Page loads and all key elements are visible', async ({ page }) => {
   // Check for File Type select trigger
   await expect(page.getByText('File Type')).toBeVisible();
 
-  // Check for reCAPTCHA iframe (may fail if hidden by reCAPTCHA provider)
-  await expect(page.locator('iframe').first()).toBeVisible();
+  // Check for reCAPTCHA iframe specifically (avoid strict mode on multiple iframes)
+  await expect(page.locator('iframe[title="reCAPTCHA"]')).toBeVisible();
+
 
   // Check for Process button
   await expect(page.getByRole('button', { name: /Process/ })).toBeVisible();

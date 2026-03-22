@@ -27,3 +27,17 @@ def test_process_file_creates_output(file_type, test_file_path, width, height, q
 
     # Clean up generated file
     os.remove(output_path)
+
+
+def test_max_bytes_enforced(tmp_path):
+    # Create a tiny file
+    p = tmp_path / "tiny.bin"
+    p.write_bytes(b"hello world")
+    class DF:
+        def __init__(self, path):
+            self.filename = os.path.basename(path)
+            self.file = open(path, "rb")
+    dummy = DF(str(p))
+    # Set max_bytes lower than file size to force failure
+    out = process_file(dummy, "Image", None, None, None, max_bytes=5)
+    assert out is None

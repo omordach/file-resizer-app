@@ -35,7 +35,8 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 async def rate_limit_middleware(request: Request, call_next):
-    client_ip = request.client.host
+    xff = request.headers.get("x-forwarded-for")
+    client_ip = xff.split(",")[0].strip() if xff else (request.client.host if request.client else "unknown")
     path = request.url.path
     method = request.method
 
