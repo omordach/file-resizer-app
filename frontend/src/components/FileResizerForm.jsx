@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import ReCAPTCHA from "react-google-recaptcha";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
@@ -14,13 +15,13 @@ export default function FileResizerForm() {
   const [height, setHeight] = useState("");
   const [quality, setQuality] = useState("ebook");
   const [captchaToken, setCaptchaToken] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [isLoading, setIsLoading] = useState(false);
 
   const onDrop = (acceptedFiles) => {
     const uploadedFile = acceptedFiles[0];
     setFile(uploadedFile);
-    setMessage("");
+    setMessage({ text: "", type: "" });
 
     // Auto-detect file type
     if (uploadedFile.type.startsWith("image/")) {
@@ -38,8 +39,8 @@ export default function FileResizerForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return setMessage("⚠️ Please select a file.");
-    if (!captchaToken) return setMessage("⚠️ Please complete the captcha.");
+    if (!file) return setMessage({ text: "⚠️ Please select a file.", type: "error" });
+    if (!captchaToken) return setMessage({ text: "⚠️ Please complete the captcha.", type: "error" });
 
     const formData = new FormData();
     formData.append("file", file);
@@ -60,13 +61,13 @@ export default function FileResizerForm() {
         link.href = url;
         link.download = file.name;
         link.click();
-        setMessage("✅ File processed successfully.");
+        setMessage({ text: "✅ File processed successfully.", type: "success" });
       } else {
-        setMessage("❌ Error processing file.");
+        setMessage({ text: "❌ Error processing file.", type: "error" });
       }
     } catch (error) {
       console.error(error);
-      setMessage("❌ An unexpected error occurred.");
+      setMessage({ text: "❌ An unexpected error occurred.", type: "error" });
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +75,7 @@ export default function FileResizerForm() {
 
   const handleClear = () => {
     setFile(null);
-    setMessage("");
+    setMessage({ text: "", type: "" });
   };
 
   return (
@@ -83,7 +84,12 @@ export default function FileResizerForm() {
         <CardContent className="p-6 space-y-4">
           <h2 className="text-xl font-semibold text-center">Resize File</h2>
 
-          <div {...getRootProps()} className={`border-2 border-dashed p-4 text-center rounded cursor-pointer ${isDragActive ? "bg-gray-100" : "bg-white"}`}>
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed p-4 text-center rounded cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+              isDragActive ? "bg-gray-100" : "bg-white"
+            }`}
+          >
             <input {...getInputProps()} />
             {file ? <p>Selected file: {file.name}</p> : <p>Drag 'n' drop a file here, or click to select</p>}
             <p className="text-xs text-muted-foreground mt-1">Supported: JPG, PNG, PDF (max 30MB)</p>
@@ -142,12 +148,22 @@ export default function FileResizerForm() {
 
           <div className="flex space-x-2 mt-2">
             <Button className="w-full" onClick={handleSubmit} disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {isLoading ? "Processing..." : "Process"}
             </Button>
             {file && <Button variant="secondary" onClick={handleClear}>Clear File</Button>}
           </div>
 
-          {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
+          {message.text && (
+            <p
+              aria-live="polite"
+              className={`text-center text-sm font-medium ${
+                message.type === "error" ? "text-destructive" : "text-green-600"
+              }`}
+            >
+              {message.text}
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
