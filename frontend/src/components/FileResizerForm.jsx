@@ -101,14 +101,20 @@ export default function FileResizerForm() {
         <CardContent className="p-6 space-y-4">
           <h2 className="text-xl font-semibold text-center">Resize File</h2>
 
-          <div {...getRootProps()} className={`border-2 border-dashed p-4 text-center rounded cursor-pointer ${isDragActive ? "bg-gray-100" : "bg-white"}`}>
-            <input {...getInputProps()} />
-            {file ? <p>Selected file: {file.name}</p> : <p>Drag 'n' drop a file here, or click to select</p>}
+          <div {...getRootProps()} className={`border-2 border-dashed p-6 text-center rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:bg-muted/50 bg-background"}`}>
+            <input {...getInputProps()} aria-label="File upload dropzone" />
+            {file ? (
+              <p className="font-medium text-primary">
+                {file.name} <span className="text-muted-foreground font-normal">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+              </p>
+            ) : (
+              <p className="font-medium">Drag 'n' drop a file here, or click to select</p>
+            )}
             <p className="text-xs text-muted-foreground mt-1">Supported: JPG, PNG, PDF (max 30MB)</p>
           </div>
 
           {file && file.type.startsWith("image/") && (
-            <img src={previewUrl} alt="Preview" className="mt-2 rounded shadow" />
+            <img src={previewUrl} alt={`Preview of ${file.name}`} className="mt-2 rounded-md shadow-sm max-h-48 object-contain mx-auto" />
           )}
 
           <div>
@@ -125,16 +131,16 @@ export default function FileResizerForm() {
           </div>
 
           {fileType === "Image" && (
-            <>
-              <div>
-                <Label htmlFor="width">Width</Label>
-                <Input id="width" type="number" value={width} onChange={(e) => setWidth(e.target.value)} />
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Label htmlFor="width">Width (px)</Label>
+                <Input id="width" type="number" placeholder="Auto" value={width} onChange={(e) => setWidth(e.target.value)} />
               </div>
-              <div>
-                <Label htmlFor="height">Height</Label>
-                <Input id="height" type="number" value={height} onChange={(e) => setHeight(e.target.value)} />
+              <div className="flex-1">
+                <Label htmlFor="height">Height (px)</Label>
+                <Input id="height" type="number" placeholder="Auto" value={height} onChange={(e) => setHeight(e.target.value)} />
               </div>
-            </>
+            </div>
           )}
 
           {fileType === "PDF" && (
@@ -158,11 +164,15 @@ export default function FileResizerForm() {
             <ReCAPTCHA sitekey="6Ld_rTsrAAAAAL3WCWzTJnrRYDdPKxbKvkJR1B1r" onChange={handleCaptchaChange} />
           </div>
 
-          <div className="flex space-x-2 mt-2">
-            <Button className="w-full" onClick={handleSubmit} disabled={isLoading}>
-              {isLoading ? "Processing..." : "Process"}
+          <div className="flex space-x-2 mt-4">
+            <Button className="w-full transition-all" onClick={handleSubmit} disabled={isLoading || !file}>
+              {isLoading ? "Processing..." : "Process File"}
             </Button>
-            {file && <Button variant="secondary" onClick={handleClear}>Clear File</Button>}
+            {file && (
+              <Button variant="outline" onClick={handleClear} aria-label="Clear selected file" title="Clear file" className="px-3 hover:bg-destructive/10 hover:text-destructive">
+                Clear
+              </Button>
+            )}
           </div>
 
           {message && <p className="text-center text-sm text-muted-foreground">{message}</p>}
