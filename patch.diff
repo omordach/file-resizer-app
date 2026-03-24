@@ -1,0 +1,16 @@
+--- backend/app/utils.py
++++ backend/app/utils.py
+@@ -26,10 +26,12 @@
+     safe_suffix = ext_map.get(content_type, ".bin")
+
+     with NamedTemporaryFile(delete=False, suffix=safe_suffix) as temp_input:
++        temp_input_path = temp_input.name
+         try:
+             _copy_with_limit(file.file, temp_input, max_bytes=max_bytes)
+         except ValueError:
++            with contextlib.suppress(Exception):
++                os.remove(temp_input_path)
+             return None
+-        temp_input_path = temp_input.name
+
+     output_dir = os.path.dirname(temp_input_path)
